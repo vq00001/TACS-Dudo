@@ -1,4 +1,7 @@
 import pytest
+import sys
+sys.path.append('src/juego')
+import dado
 
 def test_tirar_dado(mocker):
    mock_random = mocker.patch('dado.random.randint')
