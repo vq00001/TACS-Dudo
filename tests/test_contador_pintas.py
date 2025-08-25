@@ -23,13 +23,13 @@ def test_contar_sin_repetidos():
     assert contador.contar(dados, 5) == 1
     assert contador.contar(dados, 6) == 1
 
-def test_contar_todas_pintas_distintas():
+def test_contar_todas_pintas_distintas_sin_considerar_ases():
     dados = [1, 2, 3, 4, 5]
     contador = ContadorPintas()
     for i in range(1, 6):
         assert contador.contar(dados, i) == 1
 
-def test_contar_todas_pintas_iguales():
+def test_contar_todas_pintas_iguales_sin_conciderar_ases():
     dados = [3, 3, 3, 3, 3]
     contador = ContadorPintas()
     assert contador.contar(dados, 3) == 5

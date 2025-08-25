@@ -1,7 +1,8 @@
 class ContadorPintas:
     def contar(self, dados, numero):
-        # contar cuántas veces aparece "numero" en los dados
-        total = 0
-        for d in dados:
-            total += d.count(numero)
-        return total
+        """
+        cuenta cuántas veces está el "numero"(pinta) indicada en la lista de los dados.
+        !!no considera ases(1) como comodines para esta version de los test -> 1 es un numero normal por ahora, aun no es un comodin
+        
+        """
+        return dados.count(numero)
