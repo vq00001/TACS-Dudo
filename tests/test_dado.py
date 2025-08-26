@@ -4,10 +4,11 @@ sys.path.append('src/juego')
 import dado
 
 def test_tirar_dado(mocker):
+   obj_dado = dado.dado()
    mock_random = mocker.patch('dado.random.randint')
    mock_random.return_value = 2
 
-   resultado = dado.tirar()
+   resultado = obj_dado.tirar()
 
    assert resultado == 2
 
