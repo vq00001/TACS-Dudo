@@ -1,4 +1,5 @@
 from juego.contador_pintas import ContadorPintas
+import pytest
 
 #-------------------------------------------------------------------------------------------
 #casos comunes
@@ -109,21 +110,9 @@ def test_full_especial():
     # Apostando a 4
     assert contador.contar_con_comodines(dados, 4) == 2
 
-def test_invalido_numero_cero():
+@pytest.mark.parametrize("numero", [0, -1, 7]) #numeros invalidos
+def test_numeros_invalidos(numero):
     dados = [1, 2, 3, 4, 5]
     contador = ContadorPintas()
-    assert contador.contar_sin_comodines(dados, 0) == 0
-    assert contador.contar_con_comodines(dados, 0) == 1  
-
-def test_invalido_numero_negativo():
-    dados = [1, 2, 3, 4, 5]
-    contador = ContadorPintas()
-    assert contador.contar_sin_comodines(dados, -1) == 0
-    assert contador.contar_con_comodines(dados, -1) == 1
-
-def test_invalido_numero_mayor_6():
-    dados = [1, 2, 3, 4, 5]
-    contador = ContadorPintas()
-    assert contador.contar_sin_comodines(dados, 7) == 0
-    assert contador.contar_con_comodines(dados, 7) == 1
-    
+    assert contador.contar_sin_comodines(dados, numero) == 0
+    assert contador.contar_con_comodines(dados, numero) == 1  # solo los Ases como comodín
