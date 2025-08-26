@@ -76,3 +76,53 @@ def test_contar_pintas_numero_no_en_dados_con_ases():
 
 #-------------------------------------------------------------------------------------------
 #casos borde
+
+def test_lista_vacia():
+    dados = []
+    contador = ContadorPintas()
+    assert contador.contar_sin_comodines(dados, 3) == 0
+    assert contador.contar_con_comodines(dados, 3) == 0
+
+def test_numero_no_aparece():
+    dados = [2, 4, 5, 6, 1]
+    contador = ContadorPintas()
+    assert contador.contar_sin_comodines(dados, 3) == 0
+    # Con comodines (1 es comodín)
+    assert contador.contar_con_comodines(dados, 3) == 1
+
+def test_todos_dados_iguales():
+    dados = [4, 4, 4, 4, 4]
+    contador = ContadorPintas()
+    assert contador.contar_sin_comodines(dados, 4) == 5
+    assert contador.contar_con_comodines(dados, 4) == 5
+
+    dados_as = [1, 1, 1, 1, 1]
+    assert contador.contar_sin_comodines(dados_as, 1) == 5
+    assert contador.contar_con_comodines(dados_as, 2) == 5  # todos los ases cuentan como comodines
+
+def test_full_especial():
+    # caso especial del "FULL", cuando el jugador aun tiene los 5 dados y obtiene un trio de pintas iguales y las otras dos restantes tienen igual pinta entre ellas 
+    dados = [3, 3, 3, 4, 4]
+    contador = ContadorPintas()
+    # Apostando a 3
+    assert contador.contar_con_comodines(dados, 3) == 3
+    # Apostando a 4
+    assert contador.contar_con_comodines(dados, 4) == 2
+
+def test_invalido_numero_cero():
+    dados = [1, 2, 3, 4, 5]
+    contador = ContadorPintas()
+    assert contador.contar_sin_comodines(dados, 0) == 0
+    assert contador.contar_con_comodines(dados, 0) == 1  
+
+def test_invalido_numero_negativo():
+    dados = [1, 2, 3, 4, 5]
+    contador = ContadorPintas()
+    assert contador.contar_sin_comodines(dados, -1) == 0
+    assert contador.contar_con_comodines(dados, -1) == 1
+
+def test_invalido_numero_mayor_6():
+    dados = [1, 2, 3, 4, 5]
+    contador = ContadorPintas()
+    assert contador.contar_sin_comodines(dados, 7) == 0
+    assert contador.contar_con_comodines(dados, 7) == 1
