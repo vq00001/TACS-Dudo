@@ -126,3 +126,4 @@ def test_invalido_numero_mayor_6():
     contador = ContadorPintas()
     assert contador.contar_sin_comodines(dados, 7) == 0
     assert contador.contar_con_comodines(dados, 7) == 1
+    

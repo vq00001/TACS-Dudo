@@ -5,20 +5,27 @@ class ContadorPintas:
         !! no considera Ases(1) como comodines esta función -> 1 es un numero normal 
 
         """
+        if not dados or numero < 1 or numero > 6:
+            return 0
         return dados.count(numero)
     
-    def contar_con_comodines(self, dados, apuesta):
+    def contar_con_comodines(self, dados, apuesta, ases_comodines=True):
         """
         cuenta cuántas veces aparece la pinta apostada en los dados.
-        !! los Ases(1) cuentan como comodines, excepto cuando la apuesta es por 1.
+        !! los Ases(1) cuentan como comodines, excepto cuando la apuesta es por 1 o , ases_comodines=False
 
         """
-        # Contar cuántos dados coinciden con la apuesta
-        num_apostados = self.contar_sin_comodines(dados, apuesta)
+        if not dados:
+            return 0
 
-        # Contar Ases como comodines si la apuesta no es 1
-        num_ases = 0
-        if apuesta != 1:
-            num_ases = self.contar_sin_comodines(dados, 1)
+        # si el número es inválido (sobre el 6, 0 o negativos), cuenta solo Ases como comodines
+        if apuesta < 1 or apuesta > 6:
+            return sum(1 for d in dados if d == 1) if ases_comodines else 0
 
-        return num_apostados + num_ases
+        contador = 0
+        for d in dados:
+            if d == apuesta:
+                contador += 1
+            elif d == 1 and apuesta != 1 and ases_comodines:
+                contador += 1
+        return contador
