@@ -116,3 +116,11 @@ def test_numeros_invalidos(numero):
     contador = ContadorPintas()
     assert contador.contar_sin_comodines(dados, numero) == 0
     assert contador.contar_con_comodines(dados, numero) == 1  # solo los Ases como comodín
+
+def test_mas_de_cinco_dados():
+    dados = [1, 2, 3, 4, 5, 6]  # no debería haber mas de 5 dados por cacho -> INVALIDO
+    contador = ContadorPintas()
+    with pytest.raises(ValueError):
+        contador.contar_con_comodines(dados, 3)
+    with pytest.raises(ValueError):
+        contador.contar_sin_comodines(dados, 3)
