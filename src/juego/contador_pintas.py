@@ -5,6 +5,8 @@ class ContadorPintas:
         !! no considera Ases(1) como comodines esta función -> 1 es un numero normal 
 
         """
+        if len(dados) > 5:
+            raise ValueError("No puede haber más de 5 dados")
         if not dados or numero < 1 or numero > 6:
             return 0
         return dados.count(numero)
@@ -15,10 +17,10 @@ class ContadorPintas:
         !! los Ases(1) cuentan como comodines, excepto cuando la apuesta es por 1 o , ases_comodines=False
 
         """
+        if len(dados) > 5:
+            raise ValueError("No puede haber más de 5 dados")
         if not dados:
             return 0
-
-        # si el número es inválido (sobre el 6, 0 o negativos), cuenta solo Ases como comodines
         if apuesta < 1 or apuesta > 6:
             return sum(1 for d in dados if d == 1) if ases_comodines else 0
 
