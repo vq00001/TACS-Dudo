@@ -62,3 +62,21 @@ def test_subir_apuesta_tanto_numero_como_cantidad():
     val.set_apuesta(2, 3)
     nueva_cantidad, nuevo_numero = 3, 4  # intento subir ambos
     assert val.validar_subida(nueva_cantidad, nuevo_numero) 
+
+#casos invalidos
+def test_subir_apuesta_invalida_numero_menor():
+    val = ValidadorApuesta()
+    val.set_apuesta(3, 4)
+    nueva_cantidad, nuevo_numero = 4, 3  # aumento cantidad pero bajo el número -> invalido
+    assert not val.validar_subida(nueva_cantidad, nuevo_numero) #espero un FALSE
+
+def test_subir_apuesta_invalida_cantidad_menor():
+    val = ValidadorApuesta()
+    val.set_apuesta(3, 4)
+    nueva_cantidad, nuevo_numero = 2, 5  # disminuyo cantidad -> invalido
+    assert not val.validar_subida(nueva_cantidad, nuevo_numero) #espero un FALSE
+
+def test_subir_apuesta_sin_apuesta_previa():
+    val = ValidadorApuesta()
+    nueva_cantidad, nuevo_numero = 2, 3
+    assert not val.validar_subida(nueva_cantidad, nuevo_numero) # no hay apuesta previa->espero un FALSE
