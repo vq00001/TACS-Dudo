@@ -28,3 +28,9 @@ def test_multiples_dados(mocker):
    
    assert resultado1 == 1
    assert resultado2 == 3
+
+def test_get():
+   obj_dado = dado.dado()
+   resultado = obj_dado.tirar()
+
+   assert dado.getnumber() == resultado
