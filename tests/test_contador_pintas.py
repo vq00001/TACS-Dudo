@@ -101,14 +101,25 @@ def test_todos_dados_iguales():
     assert contador.contar_sin_comodines(dados_as, 1) == 5
     assert contador.contar_con_comodines(dados_as, 2) == 5  # todos los ases cuentan como comodines
 
-def test_full_especial():
-    # caso especial del "FULL", cuando el jugador aun tiene los 5 dados y obtiene un trio de pintas iguales y las otras dos restantes tienen igual pinta entre ellas 
+def test_full_especial_trio_y_par():
+    # Caso clásico: trío + par
     dados = [3, 3, 3, 4, 4]
     contador = ContadorPintas()
-    # Apostando a 3
-    assert contador.contar_con_comodines(dados, 3) == 3
-    # Apostando a 4
-    assert contador.contar_con_comodines(dados, 4) == 2
+    assert contador.es_full(dados) is True
+
+
+def test_full_especial_todos_diferentes():
+    # Caso especial: los 5 dados son diferentes
+    dados = [1, 2, 3, 4, 5]
+    contador = ContadorPintas()
+    assert contador.es_full(dados) is True
+
+
+def test_full_especial_todos_iguales():
+    # Caso especial: los 5 dados son iguales
+    dados = [6, 6, 6, 6, 6]
+    contador = ContadorPintas()
+    assert contador.es_full(dados) is True
 
 @pytest.mark.parametrize("numero", [0, -1, 7]) #numeros invalidos
 def test_numeros_invalidos(numero):

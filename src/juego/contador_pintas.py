@@ -1,3 +1,5 @@
+from collections import Counter
+
 class ContadorPintas:
     def contar_sin_comodines(self, dados, numero):
         """
@@ -31,3 +33,34 @@ class ContadorPintas:
             elif d == 1 and apuesta != 1 and ases_comodines:
                 contador += 1
         return contador
+    
+    def es_full(self, dados):
+        """
+        ve si se puede hacer el FULL:
+        - 3 de una pinta y 2 de otra (clásico), o
+        - los 5 dados iguales, o
+        - los 5 dados todos distintos.
+        los Ases(1) NO son comodines: se cuentan como 1.
+        """
+        # Reglas de tamaño
+        if len(dados) > 5:
+            raise ValueError("No puede haber más de 5 dados")
+        if len(dados) != 5:
+            return False  # el FULL solo se puede hacer con los 5 dados
+
+        # Validación de caras
+        for d in dados:
+            if d < 1 or d > 6:
+                raise ValueError("Dado inválido: debe estar entre 1 y 6")
+
+        # 5 iguales
+        if len(set(dados)) == 1:
+            return True
+
+        # 5 distintas
+        if len(set(dados)) == 5:
+            return True
+
+        # 3 de una pinta + 2 de otra pinta
+        conteos = Counter(dados).values()
+        return sorted(conteos) == [2, 3]
