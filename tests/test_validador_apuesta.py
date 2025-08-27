@@ -41,3 +41,24 @@ def test_get_apuesta_sin_definir():
     val = ValidadorApuesta()
     with pytest.raises(ValueError):
         val.get_apuesta()  # todavía no se ha definido ninguna apuesta
+
+#-------------------------------------------------------------------------------------------
+#subir apuesta (numero=pinta)
+
+def test_subir_apuesta_cantidad_mayor():
+    val = ValidadorApuesta()
+    val.set_apuesta(2, 3)
+    nueva_cantidad, nuevo_numero = 3, 3  # intento subir cantidad (2 trenes->3 trenes, deberia ser valido)
+    assert val.validar_subida(nueva_cantidad, nuevo_numero) 
+
+def test_subir_apuesta_mismo_numero():
+    val = ValidadorApuesta()
+    val.set_apuesta(2, 3)
+    nueva_cantidad, nuevo_numero = 2, 4  # intento subir número manteniendo cantidad (2 trenes->2 cuartos, deberia ser valido)
+    assert val.validar_subida(nueva_cantidad, nuevo_numero)  
+
+def test_subir_apuesta_tanto_numero_como_cantidad():
+    val = ValidadorApuesta()
+    val.set_apuesta(2, 3)
+    nueva_cantidad, nuevo_numero = 3, 4  # intento subir ambos
+    assert val.validar_subida(nueva_cantidad, nuevo_numero) 
