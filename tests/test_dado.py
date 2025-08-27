@@ -33,4 +33,4 @@ def test_get():
    obj_dado = dado.dado()
    resultado = obj_dado.tirar()
 
-   assert dado.getnumber() == resultado
+   assert obj_dado.get() == resultado

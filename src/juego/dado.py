@@ -2,7 +2,11 @@ import random
 
 class dado:
    def __init__(self):
-      pass
-
+      self.numero = None
+   
    def tirar(self):
-      return random.randint(1,6)
+      self.numero = random.randint(1,6)
+      return self.numero
+   
+   def get(self):
+      return self.numero
