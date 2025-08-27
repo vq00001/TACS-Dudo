@@ -1,5 +1,5 @@
 import pytest
-from validador_apuesta import ValidadorApuesta
+from juego.validador_apuesta import ValidadorApuesta
 
 def test_set_get_apuesta_valida():
     val = ValidadorApuesta()
