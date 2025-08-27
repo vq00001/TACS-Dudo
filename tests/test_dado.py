@@ -12,7 +12,7 @@ def test_tirar_dado(mocker):
 
    assert resultado == 2
 
-def test_multiples_dados(mocker):
+def test_tirar_multiples_dados(mocker):
    obj_dado1 = dado.dado()
    obj_dado2 = dado.dado()
 
@@ -29,8 +29,8 @@ def test_multiples_dados(mocker):
    assert resultado1 == 1
    assert resultado2 == 3
 
-def test_get():
+def test_ver_dado():
    obj_dado = dado.dado()
    resultado = obj_dado.tirar()
 
-   assert obj_dado.get() == resultado
+   assert obj_dado.ver() == resultado

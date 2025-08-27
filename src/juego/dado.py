@@ -8,5 +8,5 @@ class dado:
       self.numero = random.randint(1,6)
       return self.numero
    
-   def get(self):
+   def ver(self):
       return self.numero
