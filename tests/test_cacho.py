@@ -14,3 +14,10 @@ def test_tirar_dados():
     for dado in dados:
         valor = dado.ver()
         assert valor >=1 and valor <= 6 and valor is not None
+
+def test_ver_dados():
+    obj_cacho = cacho.cacho()
+    dados = obj_cacho.tirar_dados()
+
+    for dado in obj_cacho.ver_dados():
+        assert dado >=1 and dado <=6 and dado is not None
