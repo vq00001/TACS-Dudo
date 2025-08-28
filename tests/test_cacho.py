@@ -27,3 +27,9 @@ def test_sacar_dado():
     oldlen = len(obj_cacho.dados)
     newlen = len(obj_cacho.sacar_dado())
     assert newlen == oldlen - 1
+
+def test_agregar_dado():
+    obj_cacho = cacho.cacho()
+    oldlen = len(obj_cacho.dados)
+    newlen = len(obj_cacho.agregar_dado())
+    assert newlen == oldlen + 1
