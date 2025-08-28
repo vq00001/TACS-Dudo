@@ -21,3 +21,9 @@ def test_ver_dados():
 
     for dado in obj_cacho.ver_dados():
         assert dado >=1 and dado <=6 and dado is not None
+
+def test_sacar_dado():
+    obj_cacho = cacho.cacho()
+    oldlen = len(obj_cacho.dados)
+    newlen = len(obj_cacho.sacar_dado())
+    assert newlen == oldlen - 1
