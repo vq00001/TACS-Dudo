@@ -20,3 +20,8 @@ class cacho:
    def sacar_dado(self):
       self.dados.pop()
       return self.dados
+
+   def agregar_dado(self):
+      dadonuevo = dado.dado()
+      self.dados.append(dadonuevo)
+      return self.dados
