@@ -162,9 +162,8 @@ def test_bajar_apuesta_a_as_con_cantidad_impar():
     assert validador.validar_bajada(nueva_cantidad, nuevo_numero) is True
 
 def test_bajar_apuesta_a_otro_numero_es_invalido():
-    """no se puede bajar una apuesta a un número que no sea As(1)"""
     validador = ValidadorApuesta()
     validador.set_apuesta(cantidad=5, numero=4)
 
     nueva_cantidad, nuevo_numero = 4, 3
-    assert validador.validar_bajada(nueva_cantidad, nuevo_numero) is False
+    assert validador.validar_bajada(nueva_cantidad, nuevo_numero) is False #no se puede bajar una apuesta a un número que no sea As(1)

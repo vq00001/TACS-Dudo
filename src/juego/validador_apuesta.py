@@ -72,3 +72,22 @@ class ValidadorApuesta:
                 # error si la conversión a int falla
                 print("Entrada invalida. Por favor, ingrese solo numeros")
                 continue # se pide nuevamente el input
+
+    def validar_bajada(self, nueva_cantidad, nuevo_numero):
+        
+        #da TRUE si la nueva apuesta es una bajada valida 
+        # Regla 1: Solo se puede bajar la apuesta a Ases(1)
+        if nuevo_numero != 1:
+            return False
+
+        # No hay apuesta anterior para bajar
+        if self._cantidad is None or self._numero is None:
+            return False
+        
+        # Regla 2: Calcular la cantidad_nueva esperada
+        if self._cantidad % 2 == 0:  # si la cantidad anterior es par
+            cantidad_esperada = (self._cantidad / 2) + 1
+        else:  # si la cantidad anterior es impar
+            cantidad_esperada = (self._cantidad // 2) + 1 # '//' division entera da el numero entero mas bajo, entonces el '+1' es como redondear hacia arriba
+
+        return nueva_cantidad == cantidad_esperada # comparar la nueva cantidad con la esperada        
