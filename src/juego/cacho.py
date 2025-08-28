@@ -3,6 +3,7 @@ import dado
 class cacho:
    def __init__(self):
       self.dados = []
+      self.dados_extra = 0
       for i in range(5):
          self.dados.append(dado.dado())
 
@@ -22,6 +23,9 @@ class cacho:
       return self.dados
 
    def agregar_dado(self):
-      dadonuevo = dado.dado()
-      self.dados.append(dadonuevo)
+      if len(self.dados) < 5:         
+         dadonuevo = dado.dado()
+         self.dados.append(dadonuevo)
+         return self.dados
+      self.dados_extra += 1
       return self.dados
