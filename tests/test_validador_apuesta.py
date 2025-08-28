@@ -1,5 +1,5 @@
 import pytest
-from juego.validador_apuesta import ValidadorApuesta
+from juego.validador_apuesta import ValidadorApuesta, Apuesta, ApuestaInvalidaError
 
 #-------------------------------------------------------------------------------------------
 #casos comunes
@@ -80,3 +80,39 @@ def test_subir_apuesta_sin_apuesta_previa():
     val = ValidadorApuesta()
     nueva_cantidad, nuevo_numero = 2, 3
     assert not val.validar_subida(nueva_cantidad, nuevo_numero) # no hay apuesta previa->espero un FALSE
+
+#-------------------------------------------------------------------------------------------
+#apuestas con ases
+
+def test_primera_apuesta_no_puede_ser_as_si_tiene_mas_de_un_dado():
+    validador = ValidadorApuesta(primera_apuesta_ronda=True)
+    apuesta = Apuesta(cantidad=3, numero=1)
+
+    with pytest.raises(ApuestaInvalidaError, match="La primera apuesta no puede ser al número 1"):
+        validador.validar(apuesta, dados_jugador=5)
+
+
+def test_primera_apuesta_puede_ser_as_si_tiene_un_dado():
+    validador = ValidadorApuesta(primera_apuesta_ronda=True)
+    apuesta = Apuesta(cantidad=1, numero=1)
+    validador.validar(apuesta, dados_jugador=1)  #si tiene 1 dado deberia poder empezar la ronda con ases (caso ronda cerrada o abierta)
+
+
+def test_subida_apostando_a_uno_aumentando_cantidad():
+    validador = ValidadorApuesta(primera_apuesta_ronda=False)
+    apuesta_anterior = Apuesta(cantidad=2, numero=1)
+    apuesta_nueva = Apuesta(cantidad=3, numero=1)
+    # intento aumentar la cantidad pero sigo manteniendo la pinta as -> deberia ser valido
+    validador.validar_subida(apuesta_anterior, apuesta_nueva)
+
+
+def test_subida_de_uno_a_otro_numero_debe_ser_doble_mas_uno():
+    validador = ValidadorApuesta(primera_apuesta_ronda=False)
+    apuesta_anterior = Apuesta(cantidad=2, numero=1)
+    apuesta_invalida = Apuesta(cantidad=4, numero=5)  # debería fallar (mínimo es 5)
+    apuesta_valida = Apuesta(cantidad=5, numero=5)    # debería pasar
+
+    with pytest.raises(ApuestaInvalidaError, match="La cantidad minima al cambiar de 1 es el doble mas uno"):
+        validador.validar_subida(apuesta_anterior, apuesta_invalida)
+
+    validador.validar_subida(apuesta_anterior, apuesta_valida)  #espero error
