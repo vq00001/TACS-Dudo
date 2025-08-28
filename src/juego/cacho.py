@@ -30,3 +30,16 @@ class cacho:
          return self.dados
       self.dados_extra += 1
       return self.dados
+   
+   def get_nombre(self):
+      return self.nombre
+
+   def set_nombre(self, nombre):
+      self.nombre = nombre
+
+   def get_cantidad(self):
+      return len(self.dados)
+
+   def get_dados_extra(self):
+      return self.dados_extra
+    
