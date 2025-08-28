@@ -138,3 +138,33 @@ def test_obtener_apuesta_desde_consola_valida(mock_input):
 #-------------------------------------------------------------------------------------------
 #bajar apuesta (numero=pinta)
 
+def test_bajar_apuesta_a_as_con_cantidad_par():
+    """si la cantidad anterior es par->la nueva cantidad debe ser (cantidad anterior / 2) + 1"""
+    validador = ValidadorApuesta()
+    
+    cantidad_anterior, numero_anterior = 4, 3
+    validador.set_apuesta(cantidad=cantidad_anterior, numero=numero_anterior)
+    
+    # Cantidad esperada: (4 / 2) + 1 = 3
+    nueva_cantidad, nuevo_numero = 3, 1
+    
+    assert validador.validar_bajada(nueva_cantidad, nuevo_numero) is True
+
+def test_bajar_apuesta_a_as_con_cantidad_impar():
+    """si la cantidad anterior es impar->la nueva cantidad debe ser (cantidad anterior / 2) redondeada hacia arriba"""
+    validador = ValidadorApuesta()
+    
+    cantidad_anterior, numero_anterior = 5, 3
+    validador.set_apuesta(cantidad=cantidad_anterior, numero=numero_anterior)
+    
+    # Cantidad esperada: (5 / 2) = 2.5, redondeado hacia arriba = 3
+    nueva_cantidad, nuevo_numero = 3, 1
+    assert validador.validar_bajada(nueva_cantidad, nuevo_numero) is True
+
+def test_bajar_apuesta_a_otro_numero_es_invalido():
+    """no se puede bajar una apuesta a un número que no sea As(1)"""
+    validador = ValidadorApuesta()
+    validador.set_apuesta(cantidad=5, numero=4)
+
+    nueva_cantidad, nuevo_numero = 4, 3
+    assert validador.validar_bajada(nueva_cantidad, nuevo_numero) is False
