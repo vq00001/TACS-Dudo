@@ -1,5 +1,5 @@
 import pytest
-from juego.validador_apuesta import ValidadorApuesta, Apuesta, ApuestaInvalidaError
+from juego.validador_apuesta import ValidadorApuesta
 
 #-------------------------------------------------------------------------------------------
 #casos comunes
@@ -85,34 +85,39 @@ def test_subir_apuesta_sin_apuesta_previa():
 #apuestas con ases
 
 def test_primera_apuesta_no_puede_ser_as_si_tiene_mas_de_un_dado():
-    validador = ValidadorApuesta(primera_apuesta_ronda=True)
-    apuesta = Apuesta(cantidad=3, numero=1)
-
-    with pytest.raises(ApuestaInvalidaError, match="La primera apuesta no puede ser al número 1"):
-        validador.validar(apuesta, dados_jugador=5)
-
+    val = ValidadorApuesta()
+    # intento de apuesta inicial con 1(As) cuando el jugador tiene mas de un dado
+    try:
+        val.set_apuesta(cantidad=2, numero=1, jugador_un_dado=False)
+        assert False, "Espero un ValueError"
+    except ValueError as e:
+        assert "La primera apuesta de la ronda no puede ser con Ases" in str(e)
+        assert val._primera is True, "El estado de _primera no debe cambiar en un error"
 
 def test_primera_apuesta_puede_ser_as_si_tiene_un_dado():
-    validador = ValidadorApuesta(primera_apuesta_ronda=True)
-    apuesta = Apuesta(cantidad=1, numero=1)
-    validador.validar(apuesta, dados_jugador=1)  #si tiene 1 dado deberia poder empezar la ronda con ases (caso ronda cerrada o abierta)
+    val = ValidadorApuesta()
+    
+    # apuesta inicial con 1(As) cuando el jugador efectivamente tiene un unico dado
+    val.set_apuesta(cantidad=2, numero=1, jugador_un_dado=True)
+    assert val.get_apuesta() == (2, 1)
 
-
-def test_subida_apostando_a_uno_aumentando_cantidad():
-    validador = ValidadorApuesta(primera_apuesta_ronda=False)
-    apuesta_anterior = Apuesta(cantidad=2, numero=1)
-    apuesta_nueva = Apuesta(cantidad=3, numero=1)
-    # intento aumentar la cantidad pero sigo manteniendo la pinta as -> deberia ser valido
-    validador.validar_subida(apuesta_anterior, apuesta_nueva)
-
+def test_subida_apostando_a_ases_aumentando_cantidad():
+    val = ValidadorApuesta()
+    val.set_apuesta(cantidad=2, numero=1, jugador_un_dado=True)
+    nueva_cantidad, nuevo_numero = 3, 1 # aumento la cantidad pero mantengo la pinta=1
+    assert val.validar_subida(nueva_cantidad, nuevo_numero) is True #valido
+    
+    nueva_cantidad_invalida, nuevo_numero_invalido = 2, 1
+    assert val.validar_subida(nueva_cantidad_invalida, nuevo_numero_invalido) is False #invalido
 
 def test_subida_de_uno_a_otro_numero_debe_ser_doble_mas_uno():
-    validador = ValidadorApuesta(primera_apuesta_ronda=False)
-    apuesta_anterior = Apuesta(cantidad=2, numero=1)
-    apuesta_invalida = Apuesta(cantidad=4, numero=5)  # debería fallar (mínimo es 5)
-    apuesta_valida = Apuesta(cantidad=5, numero=5)    # debería pasar
-
-    with pytest.raises(ApuestaInvalidaError, match="La cantidad minima al cambiar de 1 es el doble mas uno"):
-        validador.validar_subida(apuesta_anterior, apuesta_invalida)
-
-    validador.validar_subida(apuesta_anterior, apuesta_valida)  #espero error
+    val = ValidadorApuesta()
+    val.set_apuesta(cantidad=3, numero=1, jugador_un_dado=True)
+    
+    # la nueva cantidad debe ser (3 * 2) + 1 = 7 o más
+    nueva_cantidad, nuevo_numero = 7, 2
+    assert val.validar_subida(nueva_cantidad, nuevo_numero) is True
+    
+    # un caso es inválido, ya que la cantidad es menor a 7
+    nueva_cantidad_invalida, nuevo_numero_invalido = 6, 2
+    assert val.validar_subida(nueva_cantidad_invalida, nuevo_numero_invalido) is False
