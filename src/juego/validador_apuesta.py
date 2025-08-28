@@ -52,8 +52,23 @@ class ValidadorApuesta:
         return False
 
     def obtener_apuesta_desde_consola(self):
-        entrada = input("Ingrese la apuesta (ej: '3 4') !Primer numero es la cantidad y segundo la pinta: ")
-        partes = entrada.split()
-        cantidad = int(partes[0])
-        numero = int(partes[1])
-        self.set_apuesta(cantidad, numero)
+        while True:
+            entrada = input("Ingrese su apuesta(Primero la cantidad y luego la pinta) ej: '3 4': ")
+            partes = entrada.split()
+            
+            # verificar primero que hay dos partes en la entrada
+            if len(partes) != 2:
+                print("Formato incorrecto. Por favor, ingrese dos numeros separados por un espacio")
+                continue  # se pide nuevamente el input
+            
+            try:
+                cantidad = int(partes[0])
+                numero = int(partes[1])
+                
+                self.set_apuesta(cantidad, numero)
+                return  # apuesta es válida->salimos del bucle
+            
+            except ValueError:
+                # error si la conversión a int falla
+                print("Entrada invalida. Por favor, ingrese solo numeros")
+                continue # se pide nuevamente el input
