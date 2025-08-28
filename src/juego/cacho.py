@@ -1,12 +1,18 @@
 import dado
 
 class cacho:
-    def __init__(self):
-        self.dados = []
-        for i in range(5):
-            self.dados.append(dado.dado())
+   def __init__(self):
+      self.dados = []
+      for i in range(5):
+         self.dados.append(dado.dado())
 
-    def tirar_dados(self):
-        for i in range(len(self.dados)):
-            self.dados[i].tirar()
-        return self.dados
+   def tirar_dados(self):
+      for i in range(len(self.dados)):
+         self.dados[i].tirar()
+      return self.dados
+
+   def ver_dados(self):
+      dados_num = []
+      for i in range(len(self.dados)):
+         dados_num.append(self.dados[i].ver())
+      return dados_num
