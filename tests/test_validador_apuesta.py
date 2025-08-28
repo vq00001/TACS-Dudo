@@ -1,4 +1,5 @@
 import pytest
+from unittest.mock import patch
 from juego.validador_apuesta import ValidadorApuesta
 
 #-------------------------------------------------------------------------------------------
@@ -121,3 +122,15 @@ def test_subida_de_uno_a_otro_numero_debe_ser_doble_mas_uno():
     # un caso es inválido, ya que la cantidad es menor a 7
     nueva_cantidad_invalida, nuevo_numero_invalido = 6, 2
     assert val.validar_subida(nueva_cantidad_invalida, nuevo_numero_invalido) is False
+
+#-------------------------------------------------------------------------------------------
+#apuesta por input -> mocking
+
+@patch('builtins.input', side_effect=['3 4'])
+def test_obtener_apuesta_desde_consola_valida(mock_input):
+    """
+    Prueba que la apuesta se establezca correctamente a partir de la entrada del usuario
+    """
+    validador = ValidadorApuesta()
+    validador.obtener_apuesta_desde_consola()
+    assert validador.get_apuesta() == (3, 4)
