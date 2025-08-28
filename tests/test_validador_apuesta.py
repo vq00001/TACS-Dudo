@@ -129,8 +129,12 @@ def test_subida_de_uno_a_otro_numero_debe_ser_doble_mas_uno():
 @patch('builtins.input', side_effect=['3 4'])
 def test_obtener_apuesta_desde_consola_valida(mock_input):
     """
-    Prueba que la apuesta se establezca correctamente a partir de la entrada del usuario
+    ve si la apuesta se guarda correctamente segun el input del usuario
     """
     validador = ValidadorApuesta()
     validador.obtener_apuesta_desde_consola()
     assert validador.get_apuesta() == (3, 4)
+
+#-------------------------------------------------------------------------------------------
+#bajar apuesta (numero=pinta)
+

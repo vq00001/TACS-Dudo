@@ -50,3 +50,10 @@ class ValidadorApuesta:
             return True
         
         return False
+
+    def obtener_apuesta_desde_consola(self):
+        entrada = input("Ingrese la apuesta (ej: '3 4') !Primer numero es la cantidad y segundo la pinta: ")
+        partes = entrada.split()
+        cantidad = int(partes[0])
+        numero = int(partes[1])
+        self.set_apuesta(cantidad, numero)
