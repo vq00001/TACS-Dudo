@@ -16,3 +16,7 @@ class cacho:
       for i in range(len(self.dados)):
          dados_num.append(self.dados[i].ver())
       return dados_num
+   
+   def sacar_dado(self):
+      self.dados.pop()
+      return self.dados
