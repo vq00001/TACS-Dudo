@@ -8,6 +8,19 @@ import pytest
 
 from src.juego.arbitro_ronda import *
 
+@pytest.mark.parametrize("val_dados_cachos, resultado", [
+    ([[1,2,3,4,5],[1,2,3,4,5],[1,2,3,4,5]], [0,3,3,3,3,3]),
+    ([[1,6,6,6,5],[1,4,5],[1,1,3,3,5]], [0,4,0,2,1,3,3])
+])
+def test_contar_repeticiones_dados(mocker, val_dados_cachos, resultado):
+    cachos = []
+    for dados in val_dados_cachos:
+        mock_cacho = mocker.Mock()
+        mock_cacho.ver_dados.return_value = dados
+        cachos.append(mock_cacho)
+    
+    assert ArbitroRonda.contar_repeticiones_dados(cachos) == resultado
+
 def test_dudar(mocker):
 
     cachos = [] # mockear
