@@ -16,17 +16,19 @@ class ArbitroRonda():
     @staticmethod 
     def dudar(apuesta, cachos, turno):
         dados_acumulados =  ArbitroRonda.contar_repeticiones_dados(cachos)
-        
-        if (apuesta["pinta"] != 1 and (apuesta["existencias"] > dados_acumulados[apuesta["pinta"]] + dados_acumulados[1])):
-            # los Ases se cuentan como comodin si la pinta de la apuesta es distinta a As
-            cachos[(turno - 1) % len(cachos)].sacar_dado()
-            return True
+        pinta = apuesta["pinta"]
+        if (pinta == 1 and (dados_acumulados[pinta] < apuesta["existencias"])):
 
-        elif (apuesta["existencias"] > dados_acumulados[apuesta["pinta"]]):
-
+            # los Ases no cuentan como comodin si la pinta de la apuesta es As
             # jugador que puso la apuesta pierde un dado
             cachos[(turno - 1) % len(cachos)].sacar_dado()
             return True
+        
+        elif (dados_acumulados[pinta] + dados_acumulados[1] < apuesta["existencias"]):
+            # jugador que puso la apuesta pierde un dado
+            cachos[(turno - 1) % len(cachos)].sacar_dado()
+            return True
+
         else:
             # jugador que duda pierde un dado
             cachos[turno].sacar_dado()
@@ -34,4 +36,16 @@ class ArbitroRonda():
     
     @staticmethod 
     def calzar(apuesta, cachos, turno):
-        pass
+        dados_acumulados = ArbitroRonda.contar_repeticiones_dados(cachos)
+
+        pinta = apuesta["pinta"]
+        if(pinta == 1 and (dados_acumulados[pinta] == apuesta["existencias"])):
+            cachos[turno].agregar_dado()
+            return True
+        elif(dados_acumulados[pinta] + dados_acumulados[1] == apuesta["existencias"]):
+            cachos[turno].agregar_dado()
+            return True
+        else:
+            cachos[turno].sacar_dado()
+            return False
+        
