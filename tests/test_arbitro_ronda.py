@@ -27,8 +27,8 @@ def test_dudar(mocker):
 
     for i in range(3):
         mock_cacho = mocker.Mock()
-        mock_cacho.dados.return_value = [1, 2, 3, 4, 5]
-        mock_cacho.dados_a_favor.return_value = 0
+        mock_cacho.ver_dados.return_value = [1, 2, 3, 4, 5]
+        mock_cacho.get_dados_extra.return_value = 0
         cachos.append(mock_cacho)
     
     # dudar devolvera true or false dependiendo si la duda acierta o no.
@@ -45,8 +45,7 @@ def test_dudar(mocker):
     turno = 0
     
     assert ArbitroRonda.dudar(apuesta, cachos, turno) == False
-
-    assert cachos[turno].dados.length() == 4
+    assert len(cachos[turno].ver_dados()) == 4
     assert cachos[(turno - 1) % 3].dados.length() == 5
 
     #####################################
@@ -63,9 +62,9 @@ def test_dudar(mocker):
     turno = 2
     
     assert ArbitroRonda.dudar(apuesta, cachos, turno) == True
-    assert cachos[turno].dados.length() == 5 
-    assert cachos[turno].dados_a_favor == 1
-    assert cachos[(turno - 1) % 3].dados.length() == 4
+    assert len(cachos[turno].ver_dados()) == 5 
+    assert cachos[turno].get_dados_extra() == 1
+    assert len(cachos[(turno - 1) % 3].ver_dados()) == 4
 
     ######################################
 
@@ -79,9 +78,9 @@ def test_dudar(mocker):
     turno = 2
     
     assert ArbitroRonda.dudar(apuesta, cachos, turno) == True
-    assert cachos[turno].dados.length() == 5
-    assert cachos[turno].dados_a_favor == 0
-    assert cachos[(turno - 1) % 3].dados.length() == 4 # mantiene los dados
+    assert len(cachos[turno].ver_dados()) == 5
+    assert cachos[turno].get_dados_extra() == 0
+    assert len(cachos[(turno - 1) % 3].ver_dados()) == 4 # mantiene los dados
 
 
 
@@ -94,8 +93,8 @@ def test_calzar(mocker):
 
     for i in range(3):
         mock_cacho = mocker.Mock()
-        mock_cacho.dados.return_value = [1, 2, 3, 4, 5]
-        mock_cacho.dados_a_favor.return_value = 0
+        mock_cacho.ver_dados.return_value = [1, 2, 3, 4, 5]
+        mock_cacho.get_dados_extra.return_value = 0
         cachos.append(mock_cacho)
 
     ######################################
@@ -111,8 +110,8 @@ def test_calzar(mocker):
     turno = 0
     
     assert ArbitroRonda.calzar(apuesta, cachos, turno) == True
-    assert cachos[turno].dados.length() == 5
-    assert cachos[turno].dados_a_favor == 1
+    assert len(cachos[turno].ver_dados) == 5
+    assert cachos[turno].get_dados_extra() == 1
 
     ######################################
 
@@ -127,8 +126,8 @@ def test_calzar(mocker):
     turno = 1
     
     assert ArbitroRonda.calzar(apuesta, cachos, turno) == False
-    assert cachos[turno].dados.length() == 4
-    assert cachos[turno].dados_a_favor == 0
+    assert len(cachos[turno].ver_dados()) == 4
+    assert cachos[turno].get_dados_extra() == 0
 
     ######################################
 
@@ -143,8 +142,8 @@ def test_calzar(mocker):
     turno = 0
     
     assert ArbitroRonda.calzar(apuesta, cachos, turno) == False
-    assert cachos[turno].dados.length() == 5
-    assert cachos[turno].dados_a_favor == 0
+    assert len(cachos[turno].ver_dados()) == 5
+    assert cachos[turno].get_dados_extra() == 0
 
     ######################################
 
@@ -189,8 +188,8 @@ def test_calzar(mocker):
     turno = 0
     
     assert ArbitroRonda.calzar(apuesta, cachos, turno) == True
-    assert cachos[turno].dados.length() == 2
-    assert cachos[turno].dados_a_favor == 0
+    assert len(cachos[turno].ver_dados()) == 2
+    assert cachos[turno].get_dados_extra() == 0
 
 
     
