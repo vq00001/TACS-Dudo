@@ -1,0 +1,93 @@
+class ValidadorApuesta:
+    def __init__(self):
+        self._cantidad = None
+        self._numero = None
+        self._primera = True
+        self._jugador_un_dado = False
+
+    def set_apuesta(self, cantidad, numero, jugador_un_dado=False):
+        if cantidad < 1:
+            raise ValueError("Cantidad debe ser positiva")
+        if numero < 1 or numero > 6:
+            raise ValueError("Número debe estar entre 1 y 6")
+        # regla: primera apuesta de la ronda no puede ser con 1, solo si el jugador tiene un dado
+        if self._primera and numero == 1 and not jugador_un_dado:
+            raise ValueError("La primera apuesta de la ronda no puede ser con Ases")
+
+        self._cantidad = cantidad
+        self._numero = numero
+        self._primera = False
+        self._jugador_un_dado = jugador_un_dado
+
+    def get_apuesta(self):
+        if self._cantidad is None or self._numero is None:
+            raise ValueError("No hay apuesta definida")
+        return self._cantidad, self._numero
+
+    def validar_subida(self, nueva_cantidad, nuevo_numero):
+        
+        # da TRUE si la apuesta nueva es valida y puede aumentar la anterior
+        if self._cantidad is None or self._numero is None:
+            return False  # no hay apuesta anterior
+        
+        # caso especial: si la apuesta anterior fue con 1
+        if self._numero == 1:
+            # Caso 1: mantener pinta 1, solo subiendo cantidad
+            if nuevo_numero == 1 and nueva_cantidad > self._cantidad:
+                return True
+            # Caso 2: cambiar a otro número (regla del doble mas uno)
+            if nuevo_numero > 1 and nueva_cantidad >= (self._cantidad * 2 + 1):
+                return True
+            return False
+        
+        # reglas generales:
+        # Caso 1: aumentar cantidad con pinta igual o mayor
+        if nueva_cantidad > self._cantidad and nuevo_numero >= self._numero:
+            return True
+        
+        # Caso 2: aumentar pinta con cantidad igual o mayor
+        if nueva_cantidad >= self._cantidad and nuevo_numero > self._numero:
+            return True
+        
+        return False
+
+    def obtener_apuesta_desde_consola(self):
+        while True:
+            entrada = input("Ingrese su apuesta(Primero la cantidad y luego la pinta) ej: '3 4': ")
+            partes = entrada.split()
+            
+            # verificar primero que hay dos partes en la entrada
+            if len(partes) != 2:
+                print("Formato incorrecto. Por favor, ingrese dos numeros separados por un espacio")
+                continue  # se pide nuevamente el input
+            
+            try:
+                cantidad = int(partes[0])
+                numero = int(partes[1])
+                
+                self.set_apuesta(cantidad, numero)
+                return  # apuesta es válida->salimos del bucle
+            
+            except ValueError:
+                # error si la conversión a int falla
+                print("Entrada invalida. Por favor, ingrese solo numeros")
+                continue # se pide nuevamente el input
+
+    def validar_bajada(self, nueva_cantidad, nuevo_numero):
+        
+        #da TRUE si la nueva apuesta es una bajada valida 
+        # Regla 1: Solo se puede bajar la apuesta a Ases(1)
+        if nuevo_numero != 1:
+            return False
+
+        # No hay apuesta anterior para bajar
+        if self._cantidad is None or self._numero is None:
+            return False
+        
+        # Regla 2: Calcular la cantidad_nueva esperada
+        if self._cantidad % 2 == 0:  # si la cantidad anterior es par
+            cantidad_esperada = (self._cantidad / 2) + 1
+        else:  # si la cantidad anterior es impar
+            cantidad_esperada = (self._cantidad // 2) + 1 # '//' division entera da el numero entero mas bajo, entonces el '+1' es como redondear hacia arriba
+
+        return nueva_cantidad == cantidad_esperada # comparar la nueva cantidad con la esperada        
