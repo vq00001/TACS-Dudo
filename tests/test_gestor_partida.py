@@ -7,9 +7,31 @@
 
 import pytest
 from src.juego.gestor_partida import *
+from src.servicios.excepciones import EstadoJuegoInvalido
 import random
 
 jugadores = 4
+
+def test_preguntar_accion(mocker):
+    gp = GestorPartida(3)
+    
+    # Setup mock cachos
+    for i in range(3):
+        mock_cacho = mocker.Mock()
+        mock_cacho.get_cantidad.return_value = 5
+        gp.cachos.append(mock_cacho)
+    
+    # evitar efectos secundarios
+    mocker.patch('src.juego.gestor_partida.os.system')
+    mocker.patch('time.sleep')
+    mocker.patch('builtins.print')
+    
+    mock_input = mocker.patch('builtins.input', side_effect=["otro","ap", "apuesta"])
+    
+    gp.preguntar_accion()
+    
+    assert mock_input.call_count == 3
+
 
 @pytest.mark.parametrize("nombre_cachos, valor_dados, direccion, orden_final", [
     (["a", "b", "c", "d"], [1,2,3,4], "izquierda", ["d", "c", "b", "a"]),       # izquierda
@@ -26,7 +48,7 @@ def test_decidir_turnos(mocker, nombre_cachos, valor_dados, direccion, orden_fin
         cacho = mocker.Mock()
         gp.cachos.append(cacho)
 
-    mocker.patch('builtin.input', side_effect=nombre_cachos) # preguntar los nombres de los jugadores
+    mocker.patch('builtins.input', side_effect=nombre_cachos) # preguntar los nombres de los jugadores
     mocker.patch('random.randint', side_effect=valor_dados)  # tirar un dado por jugador
     mocker.patch('builtin.input', side_effect=direccion)     # preguntar al ganador la direccion del juego
 
@@ -54,5 +76,4 @@ def test_validar_fin_juego(mocker, cachos, resultado):
         gp.cachos.append(mock_cacho)
 
     assert gp.validar_fin_juego() == resultado
-
 
