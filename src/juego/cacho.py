@@ -1,12 +1,12 @@
-import dado
+from  src.juego.dado import *
 
-class cacho:
+class cacho:   
    def __init__(self):
       self.dados = []
       self.dados_extra = 0
       self.nombre = ""
       for i in range(5):
-         self.dados.append(dado.dado())
+         self.dados.append(dado())
 
    def tirar_dados(self):
       for i in range(len(self.dados)):
