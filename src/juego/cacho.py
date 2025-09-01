@@ -1,4 +1,4 @@
-from  src.juego.dado import *
+from src.juego.dado import *
 
 class cacho:   
    def __init__(self):
@@ -25,7 +25,7 @@ class cacho:
 
    def agregar_dado(self):
       if len(self.dados) < 5:         
-         dadonuevo = dado.dado()
+         dadonuevo = dado()
          self.dados.append(dadonuevo)
          return self.dados
       self.dados_extra += 1

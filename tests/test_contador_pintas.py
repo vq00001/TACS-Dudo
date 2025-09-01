@@ -1,4 +1,4 @@
-from juego.contador_pintas import ContadorPintas
+from src.juego.contador_pintas import ContadorPintas
 import pytest
 
 #-------------------------------------------------------------------------------------------

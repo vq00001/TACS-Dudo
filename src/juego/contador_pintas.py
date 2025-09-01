@@ -34,7 +34,7 @@ class ContadorPintas:
                 contador += 1
         return contador
     
-    def es_full(self, dados):
+    def es_full(self,dados):
         """
         ve si se puede hacer el FULL:
         - 3 de una pinta y 2 de otra (clásico), o
