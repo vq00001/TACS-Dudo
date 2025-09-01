@@ -1,28 +1,31 @@
+# GESTOR PARTIDA NEW VER 
+
 import os
 from time import sleep
 from src.juego.arbitro_ronda import *
 from src.juego.contador_pintas import *
 from src.juego.cacho import *
-
+from src.juego.validador_apuesta import ValidadorApuesta
+from src.servicios.borrar_lineas import borrar_lineas
+ 
 class GestorPartida:
     numero_jugadores = 0 # numero de cachos
     cachos = []
     turno = 0
+    apuesta = {"existencias": 0, "pinta": 0}
     pasar_flag = False
+    debug = False
 
     def __init__(self, numero_jugadores, debug=False):
         self.numero_jugadores = numero_jugadores
-    
+        self.debug = debug
+
         for i in range(numero_jugadores):
             c = cacho()
 
             if debug == False:
-                c.nombre = input(f"Nombre jugador {i}: ")
-            self.cachos.append(c)
-    
-    # tirar dado para todos los jugadores
-    # mayor numero empieza
-    # decidir orientacion (izq, der)
+                c.nombre = input(f"Nombre jugador {i + 1}: ")
+            self.cachos.append(c)    
 
     def decidir_turnos(self):
         
@@ -81,15 +84,17 @@ class GestorPartida:
 
         sleep(3)
         return self.cachos[self.turno] # devolver el cacho del primer jugador 
-    
+
     def preguntar_accion(self):
-        
+        apuesta_valida = True
+        if self.apuesta["existencias"] == 0 or self.apuesta["pinta"] == 0:
+            apuesta_valida = False
+
         accion_valida = False
         accion = ""
 
         while(not accion_valida):
-            os.system("cls")
-            print("1.apostar \n2.dudar \n3.calzar \n4.pasar")
+            print("1.apostar \n2.dudar \n3.calzar \n4.pasar \n5.ver dados")
 
             accion = input("Accion: ").lower()
             accion = accion.strip()
@@ -105,32 +110,51 @@ class GestorPartida:
 
             elif accion == "pasar" or accion == "4":
                 accion = "pasar"
-                
+            
+            elif accion == "ver dados" or accion == "5":
+                borrar_lineas(6)
+                print(f"mostrando dados de {self.cachos[self.turno].nombre}")
+                sleep(3)
+                print(self.cachos[self.turno].ver_dados())
+                input("Presionar para seguir jugando.")
+                borrar_lineas(3)
+
             else:
                 print("Accion invalida, elegir una de las siguientes opciones.")
                 sleep(3)
+                borrar_lineas(7)
                 continue
 
             numero_total_dados = 0
             for cacho in self.cachos:
-                cacho.get_cantidad()
-
+                numero_total_dados += cacho.get_cantidad()
                 
-            if accion == "calzar" and numero_total_dados <= self.numero_jugadores*5*0.2:
+            if (accion == "calzar" or accion == "dudar") and (not apuesta_valida):
+                print("Aun no se hace ninguna apuesta. Accion invalida.")
+                sleep(3)
+                borrar_lineas(7)
+                continue
+
+            elif accion == "calzar" and numero_total_dados < self.numero_jugadores*5*0.2:
                 print("Calzar no es permitido, ya que quedan menos de la mitad de dados en juego.")
                 sleep(3)
+                borrar_lineas(7)
                 continue
 
             elif accion == "pasar" and not ContadorPintas.es_full(self.cachos[self.turno].ver_dados()):
                 print("Jugador no cumple condiciones para pasar de turno.")
                 sleep(3)
+                borrar_lineas(7)
+                continue
+            elif accion == "apuesta" and not ValidadorApuesta.validar(self.apuesta):
+                sleep(3)
+                borrar_lineas(7)
                 continue
                 
-
             return accion
 
-
-    def preguntar_apuesta(self, apuesta):
+    
+    def preguntar_apuesta(self):
         nombres_pintas_singular = ["As", "Tonto", "Tren", "Cuarta", "Quina", "Sexto"]
         nombres_pintas = ["Ases", "Tontos", "Trenes", "Cuartas", "Quinas", "Sextos"]
 
@@ -201,23 +225,31 @@ class GestorPartida:
         else:
             return False
 
-
     # controlar rondas
     def loop_juego(self):
+        self.decidir_turnos()
 
-        jugando = True
+        print("\nINICIO JUEGO\n")
+        sleep(2)
 
-        while(jugando):
-
-            print("\nINICIO JUEGO\n")
-
-            apuesta = {
+        while(not self.validar_fin_juego()):
+            
+            # reiniciar la apuesta
+            self.apuesta = {
                 "existencias": 0,
                 "pinta": 0
-            }
+            } 
+
+            # tirar los dados de todos los jugadores
+            for cacho in self.cachos:
+                cacho.tirar_dados()
 
             ronda = True
             while(ronda):
+                os.system('cls')
+
+                # imprimir estado juego
+                self.imprimir_estado_juego()
 
                 # Preguntar si se quiere jugar ronda obligatoria si se cumplen las condiciones
                 if (self.cachos[self.turno].dados == 1 and self.cachos[self.turno].primer_unico_dado):
@@ -227,36 +259,95 @@ class GestorPartida:
                     if result == True:
                         turno = (turno + 1) % self.numero_jugadores
                         continue
-                
 
                 # Preguntar por la accion del turno (apostar, calzar, dudar, pasar)
-
                 accion = self.preguntar_accion()
 
                 if (accion == "apostar"):
-                    self.apuesta = self.preguntar_apuesta(apuesta)
-                    sleep(3)
-                
+                    self.apuesta = self.preguntar_apuesta()
+
                 elif (accion == "dudar"):
                     if self.pasar_flag == False: 
-                        ArbitroRonda.dudar() # mock
+
+                        resultado = ArbitroRonda.dudar(self.apuesta, self.cachos, self.turno) 
+
+                        # imprimir resultado
+                        if resultado:
+                            print(f"Exito. {self.cachos[(self.turno - 1)%self.numero_jugadores].nombre} pierde un dado.")
+                        else:
+                            print(f"Fallo. {self.cachos[self.turno].nombre} pierde un dado.")
+
+                        sleep(3)
+                        break
+                        
+                    else:  # si se duda un "pase" se termina la ronda sin perdidas ni ganancias 
+                        print("Se dudo un pase. Se comienza la siguiente ronda.")
+                        sleep(3)
+                        break
 
                 elif (accion == "calzar"):
                     jugando = False
-                    ArbitroRonda.calzar() # mock
-                
-                elif (accion == "pasar"): # validar full por implementar
+                    resultado = ArbitroRonda.calzar(self.apuesta, self.cachos, self.turno) 
+
+                    # imprimir resultado
+                    if resultado:
+                        print(f"Exito. {self.cachos[self.turno].nombre} gana un dado.")
+                    else:
+                        print(f"Fallo. {self.cachos[self.turno].nombre} pierde un dado.")
+                    sleep(3)
+                    break
+
+                elif (accion == "pasar"):
                     self.pasar_flag = True
-                
+                    sleep(3)
                 else:
+                    # si no coincide ninguna acción, volver a repetir el turno
                     continue
                 
+                # una vez termino el turno, se pasa al siguiente jugador
                 self.turno = (self.turno + 1) % self.numero_jugadores
 
-                print(f'turno: {self.cachos[self.turno].nombre}, apuesta: {apuesta}')
-
-            if self.validar_fin_juego():
-                jugando = False
 
         print("Fin del juego")
 
+
+    def imprimir_estado_juego(self, mostrar_valores=False):
+        nombres_pintas_singular = ["As", "Tonto", "Tren", "Cuarta", "Quina", "Sexto"]
+        nombres_pintas = ["Ases", "Tontos", "Trenes", "Cuartas", "Quinas", "Sextos"]
+
+        if not self.debug:
+            print("_" * 60)
+
+            # Cabecera
+            if mostrar_valores:
+                print(f"{'Jugador':<10} {'Dados':<7} {'A favor':<8} {'Valores'}")
+            else:
+                print(f"{'Jugador':<10} {'Dados':<7} {'A favor':<8}")
+
+            # Filas por jugador
+            for cacho in self.cachos:
+                if mostrar_valores:
+                    valores = ",".join(str(v) for v in cacho.dados)  # lista -> string
+                    print(f"{cacho.nombre:<10} {cacho.get_cantidad():<7} {cacho.get_dados_extra():<8} {valores}")
+                else:
+                    print(f"{cacho.nombre:<10} {cacho.get_cantidad():<7} {cacho.get_dados_extra():<8}")
+
+            print("_" * 60)
+
+   
+            if self.apuesta["existencias"] > 0 and self.apuesta["pinta"] > 0:
+            # Info de turno y apuesta
+                if self.apuesta["existencias"] > 1:
+                    print(
+                        f"TURNO: {self.cachos[self.turno].nombre:<10} "
+                        f"APUESTA: {self.apuesta['existencias']} {nombres_pintas[self.apuesta['pinta']-1]}"
+                    )
+                else:
+                    print(
+                        f"TURNO: {self.cachos[self.turno].nombre:<10} "
+                        f"APUESTA: {self.apuesta['existencias']} {nombres_pintas_singular[self.apuesta['pinta']-1]}"
+                    )
+            else:
+                print(f"TURNO: {self.cachos[self.turno].nombre:<10} SIN APUESTA")
+
+            print("_"*60)
