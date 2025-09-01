@@ -135,7 +135,17 @@ class GestorPartida:
         pass
 
     def validar_fin_juego(self):
-        pass
+       
+        cant_jugadores = 0
+        for cacho in self.cachos:
+            if cacho.get_cantidad() > 0:
+                cant_jugadores += 1
+        
+        if cant_jugadores == 1:
+            return True  
+        else:
+            return False
+
 
     # controlar rondas
     def loop_juego(self):

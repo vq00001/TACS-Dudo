@@ -81,19 +81,20 @@ def test_decidir_turnos(mocker, nombre_cachos, valor_dados, direccion, orden_fin
     for i in range(len(nombre_cachos)):
         assert gp.cachos[i].nombre == orden_final[i]
     
-@pytest.mark.parametrize("cachos, resultado", [
-    ([[1,2,3,4,5],[1,2,3,4,5],[1,2,3,4,5],[1,2,3,4,5]], False),
-    ([[1],[1,2],[],[]], False),
-    ([[],[],[1],[]], True),
-    ([[1],[2]], False),
-    ([[],[5]], True)
-] )
-def test_validar_fin_juego(mocker, cachos, resultado):
-    gp = GestorPartida(len(cachos), True)
-
-    for i in range(len(cachos)):
+@pytest.mark.parametrize("cantidad_dados, resultado", [
+    ([5,5,5,5,5], False),
+    ([1,2,0,0], False),
+    ([0,0,1,0], True),
+    ([1,2], False),
+    ([0,1], True)
+])
+def test_validar_fin_juego(mocker, cantidad_dados, resultado):
+    gp = GestorPartida(len(cantidad_dados), True)
+    gp.cachos.clear()
+    
+    for i in range(len(cantidad_dados)):
         mock_cacho = mocker.Mock()
-        mock_cacho.ver_dados.return_value = cachos[i]
+        mock_cacho.get_cantidad.return_value = cantidad_dados[i]
         gp.cachos.append(mock_cacho)
 
     assert gp.validar_fin_juego() == resultado
