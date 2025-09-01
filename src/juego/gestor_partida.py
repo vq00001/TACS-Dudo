@@ -25,7 +25,62 @@ class GestorPartida:
     # decidir orientacion (izq, der)
 
     def decidir_turnos(self):
-        pass
+        
+        print("Decidir el primer jugador...")
+        sleep(2)
+        
+        repetidos = [] 
+        dado_var = dado()
+        val_mayor_dado = 0
+        primer_jugador = -1
+
+        # tirar dado para todos los jugadores
+        for jugador in range(self.numero_jugadores):
+    
+            input(f"\n{self.cachos[jugador].nombre} Apreta para tirar dado...")
+
+            dado_var.tirar()
+
+            print(f"¡Has sacado un {dado_var.ver()}!")
+
+            # si el valor ya aparecio se agrega a repetidos para el desempate, si no se asigna el primer jugador.
+            if dado_var.ver() == val_mayor_dado:
+                repetidos.append(jugador)
+
+            elif dado_var.ver() > val_mayor_dado:
+                val_mayor_dado = dado_var.ver()
+                primer_jugador = jugador
+        
+        val_mayor_dado = 0
+        
+        # si hay jugadores empatados se repite el proceso hasta que se decida un ganador.
+        while(len(repetidos) > 0):
+            nuevos_repetidos = []
+
+            for jugador in repetidos:
+                dado_var.tirar()
+                if dado_var.ver() == val_mayor_dado:
+                    nuevos_repetidos.append(jugador)
+                elif dado_var.ver() > val_mayor_dado:
+                    val_mayor_dado = dado_var.ver()
+                    primer_jugador = jugador
+            
+            val_mayor_dado = 0
+            repetidos = nuevos_repetidos
+
+        print(f"\nComienza {self.cachos[primer_jugador].nombre}.")
+
+        # decidir sentido del juego
+        sentido = input("\n¿El sentido del juego ira hacia la izquierda o derecha? ").lower()
+        sentido = sentido.strip()
+
+        self.turno = primer_jugador  # asignar el turno al jugador que empieza.
+        if sentido == "izquierda" or sentido == "izq":   # modificar la lista de modo que quede en la direccion correcta.
+            self.cachos.reverse()
+            self.turno = self.numero_jugadores - 1 - self.turno  # recalcular index de turno
+
+        sleep(3)
+        return self.cachos[self.turno] # devolver el cacho del primer jugador 
     
     def preguntar_accion(self):
         
