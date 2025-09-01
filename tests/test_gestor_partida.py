@@ -39,11 +39,11 @@ def test_preguntar_apuesta(mocker):
     mocker.patch('builtins.print')
     mocker.patch('time.sleep')
     
-    apuesta_inicial = {"existencias": 2, "pinta": 3}
+    gp.apuesta = {"existencias": 2, "pinta": 3}
     
     mock_input = mocker.patch('builtins.input', side_effect=["abc", "invalido", "5", "ases"])
             
-    resultado = gp.preguntar_apuesta(apuesta_inicial)
+    resultado = gp.preguntar_apuesta()
     
     # Verificar que se llamó input las veces esperadas (para existencias y pinta)
     assert mock_input.call_count == 4  # abc, 5, invalido, ases
@@ -51,7 +51,6 @@ def test_preguntar_apuesta(mocker):
     # Verificar el resultado (con las entradas mockeadas: "5" y "ases")
     assert resultado["existencias"] == 5
     assert resultado["pinta"] == 1
-
 
 
 @pytest.mark.parametrize("nombre_cachos, valor_dados, direccion, orden_final", [

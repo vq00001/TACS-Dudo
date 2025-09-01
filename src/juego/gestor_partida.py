@@ -1,5 +1,3 @@
-# GESTOR PARTIDA NEW VER 
-
 import os
 from time import sleep
 from src.juego.arbitro_ronda import *
@@ -153,31 +151,32 @@ class GestorPartida:
                 
             return accion
 
-    
     def preguntar_apuesta(self):
         nombres_pintas_singular = ["As", "Tonto", "Tren", "Cuarta", "Quina", "Sexto"]
         nombres_pintas = ["Ases", "Tontos", "Trenes", "Cuartas", "Quinas", "Sextos"]
-
         apuesta_valida = False
 
         while(not apuesta_valida):
+            
+            # imprimir la apuesta actual y las pintas que se pueden escoger
+            borrar_lineas(6)
 
-            print(f'Apuesta actual: {apuesta["existencias"]} {nombres_pintas[apuesta["pinta"]-1]} \n {"--"*5}')
-       
-            i = 1
-
-            for p in nombres_pintas:
+            i = 0
+            for p in nombres_pintas_singular:
+                print(f"{i + 1} - {p}")
                 i += 1
-                print(f"{i} - {p}")
 
+            # leer el numero de existencias de la apuesta.
             existencias = input("Existencias: ").lower()
             existencias = existencias.strip()
 
             if not existencias.isdigit():
                 print("Numero de existencias debe ser un entero entre 1 y 6.")
                 sleep(3)
+                borrar_lineas(2)
                 continue
             
+            # leer la pinta de la apuesta y mapearla a un numero.
             pinta = input("Pinta: ").lower()
             pinta = pinta.strip()
 
@@ -201,8 +200,10 @@ class GestorPartida:
             else:
                 print("Pinta no valida.")
                 sleep(3)
+                borrar_lineas(3)
                 continue
             
+            # formatear la apuesta como diccionario
             nueva_apuesta = {
                 "existencias": int(existencias),
                 "pinta": pinta
