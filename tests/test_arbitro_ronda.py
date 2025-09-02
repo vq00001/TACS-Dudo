@@ -9,18 +9,36 @@ import pytest
 from src.juego.arbitro_ronda import *
 from src.servicios.excepciones import CalzadoInvalido
 
-@pytest.mark.parametrize("val_dados_cachos, resultado", [
-    ([[1,2,3,4,5],[1,2,3,4,5],[1,2,3,4,5]], [0,3,3,3,3,3,0]),
-    ([[1,6,6,6,5],[1,4,5],[1,1,3,3,5]], [0,4,0,2,1,3,3])
-])
-def test_contar_repeticiones_dados(mocker, val_dados_cachos, resultado):
-    cachos = []
-    for dados in val_dados_cachos:
-        mock_cacho = mocker.Mock()
-        mock_cacho.ver_dados.return_value = dados
-        cachos.append(mock_cacho)
+
+def test_contar_repeticiones_dados(mocker):
+    # Mock de ContadorPintas
     
-    assert ArbitroRonda.contar_repeticiones_dados(cachos) == resultado
+    # Mock cachos
+    cacho1 = mocker.Mock()
+    cacho2 = mocker.Mock()
+    cacho1.ver_dados.return_value = [1,5,5]
+    cacho2.ver_dados.return_value = [5,2,1]
+    cachos = [cacho1, cacho2]
+
+    # Caso: pinta distinta de 1 (usa contar_con_comodines)
+    pinta = 5
+    resultado = ArbitroRonda.contar_repeticiones_dados(cachos, pinta)
+    assert resultado == 5                                                     
+              
+    cacho1 = mocker.Mock()
+    cacho2 = mocker.Mock()
+    cacho1.ver_dados.return_value = [1,5,5]
+    cacho2.ver_dados.return_value = [5,2,1]
+    cachos.clear()
+    cachos = [cacho1, cacho2]
+
+    # Caso: pinta igual a 1 (usa contar_sin_comodines)
+    pinta = 1
+    resultado = ArbitroRonda.contar_repeticiones_dados(cachos, pinta)        
+    assert resultado == 2
+    
+
+# ...existing
 
 # val_dados_cachos: valores de retorno de ver_dados() para cada cacho
 # apuesta_arr: existencias, pinta
@@ -83,7 +101,8 @@ def test_calzar(mocker):
                 current_extra = mock_cacho.get_dados_extra.return_value
                 mock_cacho.get_dados_extra.return_value = current_extra + 1  # Incrementa dados extra
             else:
-                mock_cacho.ver_dados.return_value = dados_actuales.append(6)  # Agrega un dado (ej: valor 6)
+                nuevos = dados_actuales + [6]
+                mock_cacho.ver_dados.return_value =  nuevos # Agrega un dado (ej: lor 6)
         
         return side_effect
 
@@ -158,11 +177,13 @@ def test_calzar(mocker):
     }
 
     turno = 0
-    
+    cachos[0].ver_dados.return_value = [2]        # 1 vez
+    cachos[1].ver_dados.return_value = [3, 4, 5]  # 0 veces
+    cachos[2].ver_dados.return_value = [2]        # 1 vez
+
     assert ArbitroRonda.calzar(apuesta, cachos, turno) == True
     assert len(cachos[turno].ver_dados()) == 2
     assert cachos[turno].get_dados_extra() == 0
-
 
 def test_calzar_excepcion(mocker):
     # calzar es incorrecto. (Menos de la mitad de dados en juego)
@@ -171,17 +192,16 @@ def test_calzar_excepcion(mocker):
     cachos.clear() # resetear cachos
 
     mock_cacho_0 = mocker.Mock()
-    mock_cacho_0.dados.return_value = [1, 2]
+    mock_cacho_0.ver_dados.return_value = [1, 2]
     cachos.append(mock_cacho_0)
 
     mock_cacho_1 = mocker.Mock()
-    mock_cacho_1.dados.return_value = [2, 3]
+    mock_cacho_1.ver_dados.return_value = [2, 3]
     cachos.append(mock_cacho_1)
 
     mock_cacho_2 = mocker.Mock()
-    mock_cacho_2.dados.return_value = [4]
+    mock_cacho_2.ver_dados.return_value = [4]
     cachos.append(mock_cacho_2)
-
 
     apuesta = {
         "existencias": 5,
@@ -192,5 +212,3 @@ def test_calzar_excepcion(mocker):
 
     with pytest.raises(CalzadoInvalido):
         assert ArbitroRonda.calzar(apuesta, cachos, turno) == False
-
-
