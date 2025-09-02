@@ -5,6 +5,9 @@ class cacho:
       self.dados = []
       self.dados_extra = 0
       self.nombre = ""
+      self.primer_unico_dado = False
+      self.llego_a_unico_dado = False
+
       for i in range(5):
          self.dados.append(dado())
 
@@ -21,6 +24,10 @@ class cacho:
    
    def sacar_dado(self):
       self.dados.pop()
+
+      if self.get_cantidad() == 1 and not self.llego_a_unico_dado:
+        self.primer_unico_dado = True
+        self.llego_a_unico_dado = True
       return self.dados
 
    def agregar_dado(self):
