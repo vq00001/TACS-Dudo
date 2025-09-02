@@ -99,3 +99,56 @@ def test_validar_fin_juego(mocker, cantidad_dados, resultado):
 
     assert gp.validar_fin_juego() == resultado
 
+
+def test_obligar(mocker):
+    
+    gp = GestorPartida(2, True)
+    gp.cachos.clear()
+
+    # Mock cacho con un solo dado y primer_unico_dado en True
+    mock_cacho = mocker.Mock()
+    mock_cacho.get_cantidad.return_value = 1
+    mock_cacho.primer_unico_dado = True
+    gp.cachos.append(mock_cacho)
+
+    # Otro cacho cualquiera
+    otro_cacho = mocker.Mock()
+    otro_cacho.get_cantidad.return_value = 5
+    otro_cacho.primer_unico_dado = False
+    gp.cachos.append(otro_cacho)
+
+    gp.turno = 0
+
+    # Simular input para elegir ronda abierta
+    mocker.patch('builtins.input', side_effect=["1"])
+    mocker.patch('src.juego.gestor_partida.borrar_lineas')
+    mocker.patch('builtins.print')
+    mocker.patch('time.sleep')
+
+    gp.obligar()
+
+    assert gp.tipo_ronda == "abierta"
+    assert gp.jugador_que_obliga == 0
+    assert mock_cacho.primer_unico_dado is False
+
+    # simular ronda cerrada
+    mock_cacho.primer_unico_dado = True                      # resetear primer unico dado
+    gp.tipo_ronda = "normal"                                 # resetear tipo de ronda
+    gp.jugador_que_obliga = -1
+    mocker.patch('builtins.input', side_effect=["2"])
+
+    gp.obligar()
+    assert gp.tipo_ronda == "cerrada"
+    assert gp.jugador_que_obliga == 0
+    assert mock_cacho.primer_unico_dado is False
+
+    # simular ronda normal
+    mock_cacho.primer_unico_dado = True
+    gp.tipo_ronda = "cerrada"
+    gp.jugador_que_obliga = -1
+    mocker.patch('builtins.input', side_effect=["3"])
+
+    gp.obligar()
+    assert gp.tipo_ronda == "normal"
+    assert gp.jugador_que_obliga == -1
+
