@@ -285,7 +285,9 @@ class GestorPartida:
                         self.apuesta["pinta"] = nueva_apuesta["pinta"]
                     # No salimos del bucle, solo actualizamos la apuesta y continuamos el turno
                     self.turno = (self.turno + 1) % self.numero_jugadores
-
+                elif accion in ["ver dados", "2"]:
+                    self.mostrar_dados()
+                    continue
                 elif accion in ["dudar", "2"]:
                     if self.apuesta["existencias"] == 0:
                         print("Aún no se ha hecho ninguna apuesta. Acción inválida.")
