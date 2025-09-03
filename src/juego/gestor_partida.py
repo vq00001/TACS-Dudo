@@ -10,6 +10,7 @@ class GestorPartida:
 
     def __init__(self, numero_jugadores, debug=False):
         
+        self.validador_apuesta = ValidadorApuesta()
         self.numero_jugadores = numero_jugadores
         self.debug = debug
         self.cachos = []
@@ -126,128 +127,155 @@ class GestorPartida:
         
      
     # preguntar al usuario por la accion de su turno.
-    def preguntar_accion(self):
-        apuesta_valida = True
-        if self.apuesta["existencias"] == 0 or self.apuesta["pinta"] == 0:
-            apuesta_valida = False
-
-        accion_valida = False
-        accion = ""
-
-        while(not accion_valida):
-            print("1.apostar \n2.dudar \n3.calzar \n4.pasar \n5.ver dados")
-
-            accion = input("Accion: ").lower()
-            accion = accion.strip()
-
-            if accion == "apuesta" or accion == "1" or accion == "apostar":
-                accion = "apostar"
-            
-            elif accion == "dudar" or accion == "dudo" or accion == "2":
-                accion = "dudar"
-            
-            elif accion == "calzar" or accion == "3":
-                accion = "calzar"
-
-            elif accion == "pasar" or accion == "4":
-                accion = "pasar"
-            
-            elif accion == "ver dados" or accion == "5":
-                self.mostrar_dados()
-            else:
-                print("accion invalida, elegir una de las siguientes opciones.")
-                sleep(3)
-                borrar_lineas(7)
-                continue
-
-            numero_total_dados = 0
-            for cacho in self.cachos:
-                numero_total_dados += cacho.get_cantidad()
-                
-            if (accion == "calzar" or accion == "dudar") and (not apuesta_valida):
-                print("aun no se hace ninguna apuesta. Accion invalida.")
-                sleep(3)
-                borrar_lineas(7)
-                continue
-
-            elif accion == "calzar" and numero_total_dados < self.numero_jugadores*5*0.2:
-                print("calzar no es permitido, ya que quedan menos de la mitad de dados en juego.")
-                sleep(3)
-                borrar_lineas(7)
-                continue
-
-            elif accion == "pasar" and not ContadorPintas.es_full(self.cachos[self.turno].ver_dados()):
-                print("jugador no cumple condiciones para pasar de turno.")
-                sleep(3)
-                borrar_lineas(7)
-                continue
-            elif accion == "apuesta" and not ValidadorApuesta.validar(self.apuesta):
-                sleep(3)
-                borrar_lineas(7)
-                continue
-                
-            return accion
-
-    # preguntar al usuario por la apuesta.
     def preguntar_apuesta(self):
+        # Nombres de las pintas (mantén esta parte)
         nombres_pintas_singular = ["As", "Tonto", "Tren", "Cuarta", "Quina", "Sexto"]
         nombres_pintas = ["Ases", "Tontos", "Trenes", "Cuartas", "Quinas", "Sextos"]
-        apuesta_valida = False
 
-        while(not apuesta_valida):
-            
-            # imprimir la apuesta actual y las pintas que se pueden escoger
+        while True:
+            # Mostrar la apuesta actual y las pintas disponibles (mantén la lógica de impresión)
             borrar_lineas(6)
-
             i = 0
             for p in nombres_pintas_singular:
                 print(f"{i + 1} - {p}")
                 i += 1
+            print("-" * 20)
+            if self.apuesta["existencias"] > 0:
+                print(f"Apuesta anterior: {self.apuesta['existencias']} {nombres_pintas[self.apuesta['pinta'] - 1]}")
+            print("-" * 20)
 
-            # leer el numero de existencias de la apuesta.
-            existencias = input("Existencias: ").lower()
-            existencias = existencias.strip()
-
-            if not existencias.isdigit():
-                print("numero de existencias debe ser un entero entre 1 y 6.")
-                sleep(3)
-                borrar_lineas(2)
+            # Pedir la apuesta
+            entrada = input("Ingrese su apuesta (cantidad y pinta) ej: '3 4': ").lower()
+            
+            partes = entrada.split()
+            if len(partes) != 2:
+                print("Formato incorrecto. Por favor, ingrese dos números separados por un espacio.")
+                sleep(2)
                 continue
             
-            # leer la pinta de la apuesta y mapearla a un numero.
-            pinta = input("Pinta: ").lower()
-            pinta = pinta.strip()
-
-            if pinta == "as" or pinta == "ases" or pinta == "1":
-                pinta = 1
-
-            elif pinta == "tonto" or pinta == "tontos" or pinta == "2":
-                pinta = 2
-
-            elif pinta == "tren" or pinta == "trenes" or pinta == "3":
-                pinta = 3
-
-            elif pinta == "cuarta" or pinta == "cuartas" or pinta == "4":
-                pinta = 4
-
-            elif pinta == "quina" or pinta == "quinas" or pinta == "5":
-                pinta = 5
+            try:
+                nueva_cantidad = int(partes[0])
+                nuevo_numero = int(partes[1])
+            except ValueError:
+                print("Entrada inválida. Por favor, ingrese solo números.")
+                sleep(2)
+                continue
             
-            elif pinta == "sexto" or pinta == "sextos" or pinta == "6":
-                pinta = 6
+            # Primero, si no hay apuesta previa, usa set_apuesta para validar la primera apuesta
+            if self.apuesta["existencias"] == 0:
+                try:
+                    self.validador_apuesta.set_apuesta(
+                        nueva_cantidad,
+                        nuevo_numero,
+                        jugador_un_dado=(self.cachos[self.turno].get_cantidad() == 1)
+                    )
+                    # Si la validación pasa, actualiza la apuesta de la partida
+                    self.apuesta["existencias"] = nueva_cantidad
+                    self.apuesta["pinta"] = nuevo_numero
+                    return {"accion": "apostar"} # Devolver la acción como un diccionario
+                except ValueError as e:
+                    print(f"Apuesta inválida: {e}. Intente de nuevo.")
+                    sleep(2)
+                    continue
             else:
-                print("pinta no valida.")
-                sleep(3)
-                borrar_lineas(3)
+                # Si ya hay una apuesta, usa validar_subida o validar_bajada
+                valida_subida = self.validador_apuesta.validar_subida(nueva_cantidad, nuevo_numero)
+                valida_bajada = self.validador_apuesta.validar_bajada(nueva_cantidad, nuevo_numero)
+                
+                if valida_subida or valida_bajada:
+                    # Si es válida, actualiza el estado del validador y de la partida
+                    self.validador_apuesta.set_apuesta(
+                        nueva_cantidad,
+                        nuevo_numero,
+                        jugador_un_dado=(self.cachos[self.turno].get_cantidad() == 1)
+                    )
+                    self.apuesta["existencias"] = nueva_cantidad
+                    self.apuesta["pinta"] = nuevo_numero
+                    return {"accion": "apostar"}
+                else:
+                    print("Apuesta inválida. No es una subida o bajada permitida.")
+                    sleep(2)
+                    continue
+
+    # preguntar al usuario por la apuesta.
+    def preguntar_apuesta(self):
+        # Nombres de las pintas
+        nombres_pintas_singular = ["As", "Tonto", "Tren", "Cuarta", "Quina", "Sexto"]
+        nombres_pintas = ["Ases", "Tontos", "Trenes", "Cuartas", "Quinas", "Sextos"]
+
+        # Bucle para asegurar que se ingresa una apuesta válida
+        while True:
+            # Imprimir la apuesta actual y las pintas que se pueden escoger
+            borrar_lineas(6)
+            
+            i = 0
+            for p in nombres_pintas_singular:
+                print(f"{i + 1} - {p}")
+                i += 1
+            
+            print("-" * 20)
+            
+            # Si hay una apuesta anterior, mostrarla
+            if self.apuesta["existencias"] > 0:
+                print(f"Apuesta anterior: {self.apuesta['existencias']} {nombres_pintas[self.apuesta['pinta'] - 1]}")
+            
+            print("-" * 20)
+            
+            # Pedir la nueva apuesta al jugador
+            entrada = input("Ingrese su apuesta (cantidad y pinta) ej: '3 4' o 'duda' o 'calza': ").lower()
+            
+            if entrada.strip() == "duda" or entrada.strip() == "dudar":
+                return {"accion": "dudar"}
+            elif entrada.strip() == "calza" or entrada.strip() == "calzar":
+                return {"accion": "calzar"}
+            
+            partes = entrada.split()
+            
+            if len(partes) != 2:
+                print("Formato incorrecto. Por favor, ingrese dos números separados por un espacio.")
+                sleep(2)
                 continue
             
-            # formatear la apuesta como diccionario
-            nueva_apuesta = {
-                "existencias": int(existencias),
-                "pinta": pinta
-            }
-
-            return nueva_apuesta
+            try:
+                nueva_cantidad = int(partes[0])
+                nuevo_numero = int(partes[1])
+            except ValueError:
+                print("Entrada inválida. Por favor, ingrese solo números.")
+                sleep(2)
+                continue
+            
+            # Integrar la lógica de validación de ValidadorApuesta
+            # Aquí es donde conectas la clase que revisamos
+            if self.apuesta["existencias"] == 0:
+                # Primera apuesta de la ronda
+                try:
+                    self.validador_apuesta.set_apuesta(
+                        nueva_cantidad,
+                        nuevo_numero,
+                        jugador_un_dado=(self.cachos[self.turno].get_cantidad() == 1)
+                    )
+                    return {"accion": "apostar", "cantidad": nueva_cantidad, "pinta": nuevo_numero}
+                except ValueError as e:
+                    print(f"Apuesta inválida: {e}. Intente de nuevo.")
+                    sleep(2)
+                    continue
+            else:
+                # Subir o bajar la apuesta
+                # Usar los métodos validar_subida y validar_bajada
+                valida_subida = self.validador_apuesta.validar_subida(nueva_cantidad, nuevo_numero)
+                valida_bajada = self.validador_apuesta.validar_bajada(nueva_cantidad, nuevo_numero)
+                
+                if valida_subida or valida_bajada:
+                    self.validador_apuesta.set_apuesta(
+                        nueva_cantidad,
+                        nuevo_numero,
+                        jugador_un_dado=(self.cachos[self.turno].get_cantidad() == 1)
+                    )
+                    return {"accion": "apostar", "cantidad": nueva_cantidad, "pinta": nuevo_numero}
+                else:
+                    print("Apuesta inválida. No es una subida o bajada permitida.")
+                    sleep(2)
+                    continue
 
     # preguntar si se quiere hacer una ronda obligada.
     def obligar(self):
@@ -325,56 +353,82 @@ class GestorPartida:
                 
                 self.obligar()
                     
-                # Preguntar por la accion del turno (apostar, calzar, dudar, pasar)
-                accion = self.preguntar_accion()
+                # Decidir qué opciones se muestran
+                if self.apuesta["existencias"] == 0:
+                    print("1. Apostar / 2. Ver Dados")
+                else:
+                    print("1. Apostar / 2. Dudar / 3. Calzar / 4. Pasar / 5. Ver Dados")
+                
+                accion = input("Accion: ").lower().strip()
 
-                if (accion == "apostar"):
-                    self.apuesta = self.preguntar_apuesta()
+                if accion in ["apostar", "1"]:
+                    nueva_apuesta = self.preguntar_apuesta() 
+                    if "cantidad" in nueva_apuesta and "pinta" in nueva_apuesta:
+                        self.apuesta["existencias"] = nueva_apuesta["cantidad"]
+                        self.apuesta["pinta"] = nueva_apuesta["pinta"]
+                    # No salimos del bucle, solo actualizamos la apuesta y continuamos el turno
+                    self.turno = (self.turno + 1) % self.numero_jugadores
 
-                elif (accion == "dudar"):
-                    if self.pasar_flag == False: 
+                elif accion in ["dudar", "2"]:
+                    if self.apuesta["existencias"] == 0:
+                        print("Aún no se ha hecho ninguna apuesta. Acción inválida.")
+                        sleep(2)
+                        continue
+                    
+                    if self.pasar_flag == False:
+                        resultado = ArbitroRonda.dudar(self.apuesta, self.cachos, self.turno)
 
-                        resultado = ArbitroRonda.dudar(self.apuesta, self.cachos, self.turno) 
-
-                        # imprimir resultado
                         if resultado:
-                            print(f"exito. {self.cachos[(self.turno - 1)%self.numero_jugadores].nombre} pierde un dado.")
-
-                            # en la siguiente ronda parte el jugador que perdio un dado
-                            self.turno = (self.turno - 1) % self.numero_jugadores  
-
+                            print(f"Éxito. {self.cachos[(self.turno - 1)%self.numero_jugadores].nombre} pierde un dado.")
+                            self.turno = (self.turno - 1) % self.numero_jugadores
                         else:
-                            print(f"fallo. {self.cachos[self.turno].nombre} pierde un dado.")
-
-                        sleep(3)
-                        break
+                            print(f"Fallo. {self.cachos[self.turno].nombre} pierde un dado.")
                         
-                    else:  # si se duda un "pase" se termina la ronda sin perdidas ni ganancias 
-                        print("se dudo un pase. se comienza la siguiente ronda.")
+                        sleep(3)
+                        break
+                    else:
+                        print("Se dudó un pase. Se comienza la siguiente ronda.")
                         sleep(3)
                         break
 
-                elif (accion == "calzar"):
+                elif accion in ["calzar", "3"]:
+                    if self.apuesta["existencias"] == 0:
+                        print("Aún no se ha hecho ninguna apuesta. Acción inválida.")
+                        sleep(2)
+                        continue
+                    
                     jugando = False
-                    resultado = ArbitroRonda.calzar(self.apuesta, self.cachos, self.turno) 
+                    resultado = ArbitroRonda.calzar(self.apuesta, self.cachos, self.turno)
 
-                    # imprimir resultado
                     if resultado:
-                        print(f"exito. {self.cachos[self.turno].nombre} gana un dado.")
+                        print(f"Éxito. {self.cachos[self.turno].nombre} gana un dado.")
                     else:
-                        print(f"fallo. {self.cachos[self.turno].nombre} pierde un dado.")
+                        print(f"Fallo. {self.cachos[self.turno].nombre} pierde un dado.")
+                    
                     sleep(3)
                     break
 
-                elif (accion == "pasar"):
+                elif accion in ["pasar", "4"]:
+                    if not ContadorPintas.es_full(self.cachos[self.turno].ver_dados()):
+                        print("Jugador no cumple condiciones para pasar de turno.")
+                        sleep(2)
+                        continue
                     self.pasar_flag = True
                     sleep(3)
-                else:
-                    # si no coincide ninguna acción, volver a repetir el turno
+                    self.turno = (self.turno + 1) % self.numero_jugadores
+
+                elif accion in ["ver dados", "5"]:
+                    self.mostrar_dados()
                     continue
                 
-                # una vez termino el turno, se pasa al siguiente jugador
-                self.turno = (self.turno + 1) % self.numero_jugadores
+                else:
+                    print("Acción inválida. Por favor, elige una de las siguientes opciones.")
+                    sleep(2)
+                    continue
+                
+                # Pasar al siguiente jugador si la ronda no terminó
+                if accion not in ["dudar", "calzar"]:
+                    self.turno = (self.turno + 1) % self.numero_jugadores
 
             # resetear el tipo de ronda y el jugador que obliga
             self.tipo_ronda = "normal"
@@ -388,7 +442,7 @@ class GestorPartida:
                 print(f"¡HA GANADO {self.cachos[self.turno].nombre}!")
                 break
 
-        print("fin del juego.")
+        print("Fin del juego.")
 
     def imprimir_estado_juego(self):
         nombres_pintas_singular = ["As", "Tonto", "Tren", "Cuarta", "Quina", "Sexto"]
