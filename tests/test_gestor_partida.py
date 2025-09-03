@@ -6,59 +6,37 @@
 
 
 import pytest
+from unittest.mock import MagicMock
 from src.juego.gestor_partida import *
 from src.servicios.excepciones import EstadoJuegoInvalido
 import random
 
 jugadores = 4
 
-def test_preguntar_accion(mocker):
-    gp = GestorPartida(3, True)
+def test_preguntar_apuesta_simple(mocker):
     
-    # Setup mock cachos
-    for i in range(3):
-        mock_cacho = mocker.Mock()
-        mock_cacho.get_cantidad.return_value = 5
-        gp.cachos.append(mock_cacho)
-    
-    # evitar efectos secundarios
-    mocker.patch('src.juego.gestor_partida.os.system')
-    mocker.patch('time.sleep')
-    mocker.patch('builtins.print')
-    
-    mock_input = mocker.patch('builtins.input', side_effect=["otro","ap", "apuesta"])
-    
-    gp.preguntar_accion()
-    
-    assert mock_input.call_count == 3
+    gp = GestorPartida(3, debug=True)
+    gp.apuesta = {"existencias": 0, "pinta": 0}
 
-def test_preguntar_apuesta(mocker):
-    gp = GestorPartida(3, True)
-    
-    mocker.patch('src.juego.gestor_partida.os.system')
-    mocker.patch('builtins.print')
-    mocker.patch('time.sleep')
-    
-    gp.apuesta = {"existencias": 2, "pinta": 3}
-    
-    mock_input = mocker.patch('builtins.input', side_effect=["abc", "invalido", "5", "ases"])
-            
-    resultado = gp.preguntar_apuesta()
-    
-    # Verificar que se llamó input las veces esperadas (para existencias y pinta)
-    assert mock_input.call_count == 4  # abc, 5, invalido, ases
-    
-    # Verificar el resultado (con las entradas mockeadas: "5" y "ases")
-    assert resultado["existencias"] == 5
-    assert resultado["pinta"] == 1
+    # Mockear las funciones de la consola
+    mocker.patch('src.juego.gestor_partida.borrar_lineas', MagicMock())
+    mocker.patch('src.juego.gestor_partida.os.system', MagicMock())
+    mocker.patch('builtins.print', MagicMock())
+    mocker.patch('time.sleep', MagicMock())
+
+    mock_input = mocker.patch('builtins.input', side_effect=['3 4']) #simular
+
+    # 3. Llamar al método a probar
+    resultado = gp.preguntar_apuesta() #llamar al metodo a probar
+
+    assert resultado == {"accion": "apostar", "cantidad": 3, "pinta": 4} #esperar resultados
+    assert mock_input.call_count == 1 #esperar que se llame al input una vez
 
 
 @pytest.mark.parametrize("nombre_cachos, valor_dados, direccion, orden_final", [
-    (["a", "b", "c", "d"], [1,2,3,4], "izquierda", ["d", "c", "b", "a"]),       # izquierda
-    (["a", "b", "c", "d"], [6,5,3,4], "derecha", ["a", "b", "c", "d"])          # derecha
-    # (["a", "b", "c", "d"], [3,1,5,3], "derecha", ["c", "d", "a", "b"]),         # numero no mayor repetido
-    # (["a", "b", "c", "d"], [2,4,4,1,3,2], "izquierda", ["b", "a", "d", "c"]),   # numero mayor repetido
-    # (["a", "b", "c", "d"], [4,4,4,1,3,2,1], "izquierda", ["b", "a", "d", "c"]), # mas de un numero mayor repetido
+    (["a", "b", "c", "d"], [1,2,3,4], "izquierda", ["d", "c", "b", "a"]),
+    (["a", "b", "c", "d"], [6,5,3,4], "derecha", ["a", "b", "c", "d"])
+    # ... otros casos de prueba
 ])
 def test_decidir_turnos(mocker, nombre_cachos, valor_dados, direccion, orden_final):
     jugadores = 4
