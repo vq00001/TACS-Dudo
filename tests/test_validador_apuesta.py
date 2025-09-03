@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import patch
-from juego.validador_apuesta import ValidadorApuesta
+from src.juego.validador_apuesta import ValidadorApuesta
 
 #-------------------------------------------------------------------------------------------
 #casos comunes
